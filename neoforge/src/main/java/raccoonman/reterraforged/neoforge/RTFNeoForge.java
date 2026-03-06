@@ -34,6 +34,7 @@ public class RTFNeoForge {
     	PackOutput output = generator.getPackOutput();
 
     	generator.addProvider(includeClient, new RTFLanguageProvider.EnglishUS(output));
+    	generator.addProvider(includeClient, new RTFLanguageProvider.Japanese(output));
     	generator.addProvider(includeClient, PackMetadataGenerator.forFeaturePack(output, Component.translatable(RTFTranslationKeys.METADATA_DESCRIPTION)));
     }
 }

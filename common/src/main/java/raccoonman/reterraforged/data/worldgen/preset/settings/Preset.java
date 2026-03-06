@@ -13,7 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.RegistryDataLoader;
+
 import raccoonman.reterraforged.data.worldgen.compat.terrablender.TBNoiseRouterData;
 import raccoonman.reterraforged.data.worldgen.preset.PresetBiomeData;
 import raccoonman.reterraforged.data.worldgen.preset.PresetBiomeModifierData;
@@ -72,7 +72,7 @@ public record Preset(WorldSettings world, SurfaceSettings surface, CaveSettings 
 		this.addPatch(builder, Registries.NOISE_SETTINGS, PresetNoiseGeneratorSettings::bootstrap);
 
 		Cloner.Factory factory = new Cloner.Factory();
-		RegistryDataLoader.WORLDGEN_REGISTRIES.forEach(registryData -> registryData.runWithArguments(factory::addCodec));
+		RegistryUtil.getDynamicRegistriesWithDimensions().forEach(registryData -> registryData.runWithArguments(factory::addCodec));
 		factory.addCodec(RTFRegistries.NOISE, Noise.DIRECT_CODEC);
 		factory.addCodec(RTFRegistries.BIOME_MODIFIER, BiomeModifier.CODEC);
 		factory.addCodec(RTFRegistries.STRUCTURE_RULE, StructureRule.DIRECT_CODEC);

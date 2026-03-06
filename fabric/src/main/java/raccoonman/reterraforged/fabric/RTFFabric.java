@@ -29,6 +29,7 @@ public class RTFFabric implements ModInitializer, DataGeneratorEntrypoint {
 		Pack pack = fabricDataGenerator.createPack();
 
 		pack.addProvider((FabricDataOutput output) -> new RTFLanguageProvider.EnglishUS(output));
+		pack.addProvider((FabricDataOutput output) -> new RTFLanguageProvider.Japanese(output));
 		pack.addProvider((FabricDataOutput output) -> PackMetadataGenerator.forFeaturePack(output, Component.translatable(RTFTranslationKeys.METADATA_DESCRIPTION)));
 	}
 }
