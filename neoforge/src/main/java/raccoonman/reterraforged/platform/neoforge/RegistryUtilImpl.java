@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.mojang.serialization.Codec;
 
+import net.minecraft.core.Cloner;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryDataLoader.RegistryData;
 import net.minecraft.resources.ResourceKey;
@@ -60,6 +61,11 @@ public static void register(IEventBus bus) {
 
 	public static List<RegistryData<?>> getDynamicRegistries() {
 		return DataPackRegistriesHooks.getDataPackRegistries();
+	}
+
+	public static void registerDataGenCodecs(Cloner.Factory factory) {
+		factory.addCodec(ResourceKey.createRegistryKey(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("neoforge", "structure_modifier")), net.neoforged.neoforge.common.world.StructureModifier.DIRECT_CODEC);
+		factory.addCodec(ResourceKey.createRegistryKey(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("neoforge", "biome_modifier")), net.neoforged.neoforge.common.world.BiomeModifier.DIRECT_CODEC);
 	}
 
 	@SuppressWarnings("unchecked")

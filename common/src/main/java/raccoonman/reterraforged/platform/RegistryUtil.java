@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.GameRules;
 import raccoonman.reterraforged.registries.RTFRegistries;
 import raccoonman.reterraforged.world.worldgen.biome.modifier.BiomeModifier;
+import net.minecraft.core.Cloner;
 
 import java.util.List;
 
@@ -64,6 +65,11 @@ public final class RegistryUtil {
 
 	@ExpectPlatform
 	public static List<RegistryDataLoader.RegistryData<?>> getDynamicRegistries() {
+		throw new IllegalStateException();
+	}
+
+	@ExpectPlatform
+	public static void registerDataGenCodecs(Cloner.Factory factory) {
 		throw new IllegalStateException();
 	}
 

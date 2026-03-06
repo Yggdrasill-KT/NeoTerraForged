@@ -2,6 +2,7 @@ package raccoonman.reterraforged.data.worldgen.preset.settings;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import raccoonman.reterraforged.platform.RegistryUtil;
 
 import net.minecraft.core.Cloner;
 import net.minecraft.core.HolderLookup;
@@ -76,6 +77,7 @@ public record Preset(WorldSettings world, SurfaceSettings surface, CaveSettings 
 		factory.addCodec(RTFRegistries.BIOME_MODIFIER, BiomeModifier.CODEC);
 		factory.addCodec(RTFRegistries.STRUCTURE_RULE, StructureRule.DIRECT_CODEC);
 		factory.addCodec(RTFRegistries.PRESET, Preset.DIRECT_CODEC);
+		RegistryUtil.registerDataGenCodecs(factory);
 		return builder.buildPatch(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY), registries, factory).patches();
 	}
 	

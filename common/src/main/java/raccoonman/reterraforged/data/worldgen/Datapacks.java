@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.core.Cloner;
+import raccoonman.reterraforged.platform.RegistryUtil;
+
 import net.minecraft.SharedConstants;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
@@ -47,6 +49,7 @@ public class Datapacks {
 			factory.addCodec(RTFRegistries.BIOME_MODIFIER, BiomeModifier.CODEC);
 			factory.addCodec(RTFRegistries.STRUCTURE_RULE, StructureRule.DIRECT_CODEC);
 			factory.addCodec(RTFRegistries.PRESET, Preset.DIRECT_CODEC);
+			RegistryUtil.registerDataGenCodecs(factory);
 			return builder.buildPatch(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY), registryAccess,factory).patches();
 		});
 		packGenerator.addProvider((output) -> {
