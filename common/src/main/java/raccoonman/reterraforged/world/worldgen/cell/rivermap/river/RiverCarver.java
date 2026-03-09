@@ -49,6 +49,9 @@ public class RiverCarver implements Comparable<RiverCarver> {
     }
     
     public void carve(Cell cell, float px, float pz, float pt, float x, float z, float t) {
+        if (cell.terrain.isIsland()) {
+            return;
+        }
         float d2 = this.getDistance2(x, z, t);
         float pd2 = this.getDistance2(px, pz, pt);
         float valleyAlpha = this.getDistanceAlpha(pt, Math.min(d2, pd2), this.valleyWidth);

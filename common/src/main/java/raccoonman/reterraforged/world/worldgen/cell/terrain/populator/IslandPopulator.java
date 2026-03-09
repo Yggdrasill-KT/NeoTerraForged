@@ -27,22 +27,22 @@ public class IslandPopulator implements CellPopulator {
     
     public IslandPopulator(Levels levels, CellPopulator ocean, float min, float max, Interpolation interpolation) {
         this.ocean = ocean;
-        this.upper = upperPopulator(levels, -5);
+        this.upper = upperPopulator(levels, max, 25);
         this.interpolation = interpolation;
         this.blendLower = min;
         this.blendUpper = max;
         this.blendRange = this.blendUpper - this.blendLower;
         this.seaLevel = levels.water;
-        
+
         Noise islandThresholdNoise = Noises.simplex(3526, 1200, 1);
         islandThresholdNoise = Noises.warpPerlin(islandThresholdNoise, 3526, 1200, 3, 600);
         islandThresholdNoise = Noises.clamp(islandThresholdNoise, 0.0F, 1.0F);
         islandThresholdNoise = Noises.map(islandThresholdNoise, 0.7F, 0.8F);
         this.islandThresholdNoise = islandThresholdNoise;
-        
+
         Noise islandChanceVarianceNoise = Noises.simplex(54326, 1, 3);
         islandChanceVarianceNoise = Noises.clamp(islandChanceVarianceNoise, 0.0F, 1.0F);
-        islandChanceVarianceNoise = Noises.map(islandChanceVarianceNoise, -0.05F, 0.2F);
+        islandChanceVarianceNoise = Noises.map(islandChanceVarianceNoise, 0.1F, 0.3F);
         this.islandChanceVarianceNoise = islandChanceVarianceNoise;
     }
     
@@ -85,20 +85,14 @@ public class IslandPopulator implements CellPopulator {
         }
     }
     
-    private static IslandType upperPopulator(Levels levels, int depth) {
-    	// TODO sample noise for this, thisll give us the islands we want
-    	float archipelagoMaxAlpha = 0.01F;
-		float archipelagoMin = levels.water(5);
-		float archipelagoMax = levels.water(depth);
-    	return (cell, x, y, islandAlpha) -> {
-    		float archipelagoAlpha = islandAlpha;
-    		if(archipelagoAlpha > archipelagoMaxAlpha) {
-    			archipelagoAlpha -= (archipelagoAlpha - archipelagoMaxAlpha);
-    		}
-
-    		cell.terrain = TerrainType.MUSHROOM_FIELDS;
-    		cell.height = NoiseUtil.lerp(archipelagoMin, archipelagoMax, archipelagoAlpha);
-    	};
+    private static IslandType upperPopulator(Levels levels, float blendUpper, int maxHeight) {
+        float islandMin = levels.water(5);
+        float islandMax = levels.water(maxHeight);
+        return (cell, x, y, islandAlpha) -> {
+            cell.terrain = TerrainType.MUSHROOM_FIELDS;
+            float alpha = NoiseUtil.clamp((islandAlpha - blendUpper) / (blendUpper * 1.5F), 0.0F, 1.0F);
+            cell.height = NoiseUtil.lerp(islandMin, islandMax, alpha);
+        };
     }
     
     public interface IslandType {

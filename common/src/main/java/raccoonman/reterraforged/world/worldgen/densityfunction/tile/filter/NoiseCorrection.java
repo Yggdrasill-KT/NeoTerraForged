@@ -35,10 +35,13 @@ public record NoiseCorrection(Levels levels) implements Filter {
             		}
         		}
         		
-        		if(isBeach) { 
+        		if(isBeach) {
             		for(int x = startX; x < endX; x++) {
             			for(int z = startZ; z < endZ; z++) {
-            				map.getCellRaw(x, z).terrain = TerrainType.BEACH;
+            				Cell cell = map.getCellRaw(x, z);
+            				if (!cell.terrain.isIsland()) {
+            					cell.terrain = TerrainType.BEACH;
+            				}
             			}
             		}
         		}

@@ -69,7 +69,7 @@ final class PresetWidgets {
 		if(text.isEmpty()) {
 			builder = builder.displayOnlyValue();
 		}
-		CycleButton<T> button = builder.create(-1, -1, -1, -1, text.map(Component::translatable).orElse(null), callback);
+		CycleButton<T> button = builder.create(-1, -1, -1, -1, text.map(Component::translatable).orElse(Component.empty()), callback);
 		text.ifPresent((key) -> {
 			button.setTooltip(Tooltips.create(Tooltips.translationKey(key)));
 		});

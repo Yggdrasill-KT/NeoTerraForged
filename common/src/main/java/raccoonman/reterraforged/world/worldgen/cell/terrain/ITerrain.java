@@ -58,6 +58,10 @@ public interface ITerrain {
 		return false;
 	}
 
+	default boolean isIsland() {
+		return false;
+	}
+
 	public interface Delegate extends ITerrain {
 		ITerrain getDelegate();
 
@@ -115,6 +119,10 @@ public interface ITerrain {
 
 		default boolean isVolcano() {
 			return this.getDelegate().isVolcano();
+		}
+
+		default boolean isIsland() {
+			return this.getDelegate().isIsland();
 		}
 	}
 }
