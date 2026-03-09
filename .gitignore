@@ -129,3 +129,10 @@ run/
 .project
 
 *.launch
+
+# AI assistant and IDE settings
+.claude/
+.vscode/
+
+# Windows reserved names
+nul
