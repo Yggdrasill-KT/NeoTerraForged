@@ -3,6 +3,7 @@ package raccoonman.reterraforged.world.worldgen.cell.terrain.populator;
 import raccoonman.reterraforged.world.worldgen.cell.Cell;
 import raccoonman.reterraforged.world.worldgen.cell.CellPopulator;
 import raccoonman.reterraforged.world.worldgen.cell.heightmap.Levels;
+import raccoonman.reterraforged.world.worldgen.cell.terrain.Terrain;
 import raccoonman.reterraforged.world.worldgen.cell.terrain.TerrainType;
 import raccoonman.reterraforged.world.worldgen.noise.NoiseUtil;
 import raccoonman.reterraforged.world.worldgen.noise.function.Interpolation;
@@ -16,6 +17,7 @@ public class IslandPopulator implements CellPopulator {
     private float blendLower;
     private float blendUpper;
     private float blendRange;
+    private float seaLevel;
     private Noise islandThresholdNoise;
     private Noise islandChanceVarianceNoise;
     
@@ -30,6 +32,7 @@ public class IslandPopulator implements CellPopulator {
         this.blendLower = min;
         this.blendUpper = max;
         this.blendRange = this.blendUpper - this.blendLower;
+        this.seaLevel = levels.water;
         
         Noise islandThresholdNoise = Noises.simplex(3526, 1200, 1);
         islandThresholdNoise = Noises.warpPerlin(islandThresholdNoise, 3526, 1200, 3, 600);
@@ -45,6 +48,13 @@ public class IslandPopulator implements CellPopulator {
     
     @Override
     public void apply(Cell cell, float x, float z) {
+        // [Fix 問題2] 大陸セル（湾含む）は ocean として扱う
+        // 真の海洋セル（スキップされたVoronoiセル）のみ continentEdge == 0.0F
+        if (cell.continentEdge > 0.0F) {
+            this.ocean.apply(cell, x, z);
+            return;
+        }
+
     	float islandThresholdMin = this.islandThresholdNoise.compute(x, z, 0);
     	float islandThresholdMax = islandThresholdMin + 4.0F;
 
@@ -61,12 +71,18 @@ public class IslandPopulator implements CellPopulator {
             this.upper.apply(cell, x, z, islandAlpha);
             return;
         }
+        // [Fix 問題1] ブレンドゾーン: 海面下なら ocean の terrain を維持
         float alpha = this.interpolation.apply((islandAlpha - this.blendLower) / this.blendRange);
         this.ocean.apply(cell, x, z);
         float lowerHeight = cell.height;
+        Terrain oceanTerrain = cell.terrain;
         this.upper.apply(cell, x, z, islandAlpha);
         float upperHeight = cell.height;
-        cell.height = NoiseUtil.lerp(lowerHeight, upperHeight, alpha);
+        float blendedHeight = NoiseUtil.lerp(lowerHeight, upperHeight, alpha);
+        cell.height = blendedHeight;
+        if (blendedHeight < this.seaLevel) {
+            cell.terrain = oceanTerrain;
+        }
     }
     
     private static IslandType upperPopulator(Levels levels, int depth) {
