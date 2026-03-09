@@ -153,6 +153,6 @@ public record Heightmap(CellPopulator terrain, CellPopulator region, Continent c
 
         private static CellPopulator makeIslandPopulator(GeneratorContext ctx, ControlPoints controlPoints,
                         CellPopulator oceans) {
-                return new IslandPopulator(ctx.levels, oceans, controlPoints.islandInland, controlPoints.islandCoast);
+                return new IslandPopulator(ctx.levels, oceans, controlPoints.islandCoast, controlPoints.islandInland);
         }
 }

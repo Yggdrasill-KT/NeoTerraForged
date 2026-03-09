@@ -27,11 +27,11 @@ public class IslandPopulator implements CellPopulator {
     
     public IslandPopulator(Levels levels, CellPopulator ocean, float min, float max, Interpolation interpolation) {
         this.ocean = ocean;
-        this.upper = upperPopulator(levels, max, 25);
         this.interpolation = interpolation;
         this.blendLower = min;
         this.blendUpper = max;
         this.blendRange = this.blendUpper - this.blendLower;
+        this.upper = upperPopulator(levels, this.blendRange, 25);
         this.seaLevel = levels.water;
 
         Noise islandThresholdNoise = Noises.simplex(3526, 1200, 1);
@@ -62,21 +62,23 @@ public class IslandPopulator implements CellPopulator {
     	float regionEdgeAlpha = NoiseUtil.clamp(cell.terrainRegionEdge, islandThresholdMin, islandThresholdMax);
     	regionEdgeAlpha = NoiseUtil.map(regionEdgeAlpha, 0.0F, 1.0F, 2.0F);
     	
-    	float islandAlpha = cell.continentDistance * regionVarianceAlpha * regionEdgeAlpha;
-        if (islandAlpha < this.blendLower) {
+    	float rawAlpha = cell.continentDistance * regionVarianceAlpha * regionEdgeAlpha;
+        float islandAlpha = this.blendUpper - rawAlpha;   // 反転: 島の内陸ほど小さい値
+        if (islandAlpha >= this.blendUpper) {  // rawAlpha ≤ 0 → ocean
             this.ocean.apply(cell, x, z);
             return;
         }
-        if (islandAlpha > this.blendUpper) {
-            this.upper.apply(cell, x, z, islandAlpha);
+        if (islandAlpha < this.blendLower) {   // rawAlpha ≥ blendRange → inland
+            this.upper.apply(cell, x, z, rawAlpha);
             return;
         }
-        // [Fix 問題1] ブレンドゾーン: 海面下なら ocean の terrain を維持
-        float alpha = this.interpolation.apply((islandAlpha - this.blendLower) / this.blendRange);
+        // ブレンドゾーン: 海面下なら ocean の terrain を維持
+        // alpha = rawAlpha / blendRange (0=coast, 1=inland)
+        float alpha = this.interpolation.apply((this.blendUpper - islandAlpha) / this.blendRange);
         this.ocean.apply(cell, x, z);
         float lowerHeight = cell.height;
         Terrain oceanTerrain = cell.terrain;
-        this.upper.apply(cell, x, z, islandAlpha);
+        this.upper.apply(cell, x, z, rawAlpha);
         float upperHeight = cell.height;
         float blendedHeight = NoiseUtil.lerp(lowerHeight, upperHeight, alpha);
         cell.height = blendedHeight;
@@ -85,17 +87,18 @@ public class IslandPopulator implements CellPopulator {
         }
     }
     
-    private static IslandType upperPopulator(Levels levels, float blendUpper, int maxHeight) {
+    private static IslandType upperPopulator(Levels levels, float blendRange, int maxHeight) {
         float islandMin = levels.water(5);
         float islandMax = levels.water(maxHeight);
-        return (cell, x, y, islandAlpha) -> {
+        return (cell, x, z, rawAlpha) -> {
             cell.terrain = TerrainType.MUSHROOM_FIELDS;
-            float alpha = NoiseUtil.clamp((islandAlpha - blendUpper) / (blendUpper * 1.5F), 0.0F, 1.0F);
+            // 島の中心（rawAlpha 大）ほど高い地形
+            float alpha = NoiseUtil.clamp((rawAlpha - blendRange) / (blendRange * 1.5F), 0.0F, 1.0F);
             cell.height = NoiseUtil.lerp(islandMin, islandMax, alpha);
         };
     }
-    
+
     public interface IslandType {
-    	void apply(Cell cell, float x, float z, float islandAlpha);
+    	void apply(Cell cell, float x, float z, float rawAlpha);
     }
 }
